@@ -1,0 +1,20 @@
+name: gmis
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gmis_crm_app
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount the current directory to /app for hot reloading
+      - .:/app
+      # Ignore local node_modules and use the container's
+      - /app/node_modules
+    environment:
+      # Required for Vite hot reloading in Docker
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    restart: unless-stopped

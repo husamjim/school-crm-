@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Production build
+dist/
+dist-ssr/
+
+# Database & Credentials
+server/database.sqlite
+server/google_drive_credentials.json
+server/config.json
+.env
+server/.env
+
+# Executables & Logs
+*.log
+*.exe
+cloudflared.exe
+gmis_deploy.zip
+deploy_temp/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
