@@ -56,12 +56,17 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 // Security & Rate Limiting Middleware
 // ==========================================
 app.use((req, res, next) => {
+  // Normalize URL if Vercel strips /api prefix
+  if (req.url && !req.url.startsWith('/api') && !req.url.startsWith('/webhook') && !req.url.startsWith('/uploads') && req.url !== '/' && !req.url.includes('.')) {
+    req.url = '/api' + (req.url.startsWith('/') ? '' : '/') + req.url;
+  }
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   next();
 });
+
 
 const rateLimitMap = new Map();
 function createRateLimiter(maxRequests = 150, windowMs = 15 * 60 * 1000) {
@@ -714,7 +719,7 @@ app.post('/api/users', (req, res) => {
   } catch(err) { res.status(500).json({error: err.message}); }
 });
 
-app.post('/api/auth/login', authLimiter, (req, res) => {
+const handleLogin = (req, res) => {
   const { email, password } = req.body || {};
   const user = db.getUserByEmail(email);
   if (!user || !bcrypt.compareSync(password, user.password)) {
@@ -722,7 +727,11 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
   }
   const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET || 'gmis_secret_jwt_key_2026', { expiresIn: '1d' });
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, permissions: user.permissions, assigned_whatsapp: user.assigned_whatsapp, needs_password_change: user.needs_password_change } });
-});
+};
+
+app.post('/api/auth/login', authLimiter, handleLogin);
+app.post('/auth/login', authLimiter, handleLogin);
+
 
 app.post('/api/auth/change-password', (req, res) => {
   const { userId, newPassword } = req.body || {};

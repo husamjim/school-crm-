@@ -33,20 +33,28 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      let response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password })
       });
       
+      if (!response.ok && response.status === 404) {
+        response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim(), password })
+        });
+      }
+      
       const data = await response.json();
       
-      if (response.ok) {
+      if (response.ok && data.token) {
         localStorage.setItem('gmis_token', data.token);
         localStorage.setItem('gmis_user', JSON.stringify(data.user));
         onLogin();
       } else {
-        setError(isRTL ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' : 'Invalid email or password');
+        setError(data.error || (isRTL ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' : 'Invalid email or password'));
       }
     } catch (err) {
       setError(isRTL ? 'خطأ في الاتصال بالخادم، تحقق من اتصالك' : 'Server connection error, check your connection');
