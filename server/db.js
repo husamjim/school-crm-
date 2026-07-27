@@ -1,7 +1,10 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NOW_BUILDER;
+const dbPath = isServerless ? path.join('/tmp', 'database.sqlite') : path.join(__dirname, 'database.sqlite');
+const db = new Database(dbPath);
 
-const db = new Database(path.join(__dirname, 'database.sqlite'));
+
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS leads (

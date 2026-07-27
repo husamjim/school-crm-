@@ -1407,9 +1407,14 @@ app.use((req, res, next) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`=========================================`);
-  console.log(`🚀 الخادم يعمل على البورت: ${PORT}`);
-  console.log(`🔗 رابط الـ Webhook الخاص بك: http://localhost:${PORT}/webhook`);
-  console.log(`=========================================`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`=========================================`);
+    console.log(`🚀 الخادم يعمل على البورت: ${PORT}`);
+    console.log(`🔗 رابط الـ Webhook الخاص بك: http://localhost:${PORT}/webhook`);
+    console.log(`=========================================`);
+  });
+}
+
+module.exports = app;
+
